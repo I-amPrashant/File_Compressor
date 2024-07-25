@@ -4,7 +4,8 @@ const fileName = document.getElementById('fileName');
 const uploadedFile = document.getElementById('uploadedFile');
 const fileIcon = document.getElementById('fileIcon');
 
-  const reader=new FileReader()
+  const reader=new FileReader();
+  let freq={};
 uploadedFile.style.display ='none';
 let uploadSizeValid=true;
 uploadBtn.addEventListener('click', () => {
@@ -13,6 +14,7 @@ uploadBtn.addEventListener('click', () => {
 fileUpload.addEventListener('change', () => {
     uploadedFile.style.display ='none';
     uploadSizeValid=true;
+    uploadedFile.lastElementChild.id==='fileName-wrapper'?null:uploadedFile.lastElementChild.remove();
     const file= fileUpload.files[0];
     file.name.length>30? fileName.textContent = `${file.name.slice(0, 25)}...`: fileName.textContent = file.name;
     //file type check 
@@ -28,13 +30,11 @@ fileUpload.addEventListener('change', () => {
     //file size check
     if(file.size>2*1024*1024){
         uploadSizeValid=false;
-        alert('File size is too large. Please upload a file less than 4MB');
+        alert('File size is too large. Please upload a file less than 2MB');
     }
     reader.onload = () => {
         uploadSizeValid?uploadedFile.style.display = 'flex':uploadedFile.style.display = 'none';
-        console.log(reader.result)
-        const freq= frequencyCount(reader.result);
-        console.log(freq)
+        freq = frequencyCount(reader.result);
     }
     reader.readAsText(file);
 
@@ -62,8 +62,6 @@ function frequencyCount(str){
     }
     return freq;
 }
-const string="a brown fox jumps over the lazy dog"
-const freq= frequencyCount(string);
 //creating a priority or min Heap data structure based on the frequency.
 function createPriorityHeap(){
     const heap=[];
@@ -155,7 +153,33 @@ function encodeString(string, codes){
     return string.split('').map(char=>codes[char] || '').join('');
 }
   
-const rootNode=createHuffmanTree(freq)
+
+function generateUrlEncodedString(encodedString){
+       // Convert binary string to Uint8Array
+    const byteArray = new Uint8Array(Math.ceil(encodedString.length / 8));
+    for (let i = 0; i < encodedString.length; i++) {
+        if (encodedString[i] === '1') {
+            byteArray[Math.floor(i / 8)] |= (1 << (7 - (i % 8)));
+        }
+    }
+
+    const blob=new Blob([byteArray], {type:'text/plain'});
+    const url=URL.createObjectURL(blob);
+
+    //create download url
+    const a=document.createElement('a');
+    a.innerHTML=`
+    <img src="download.png" alt="download" height="25">
+    `
+    a.href=url;
+    a.download='encoded.pb';
+    uploadedFile.appendChild(a);
+}
+
+document.getElementById('compressBtn').addEventListener('click', ()=>{
+    console.log('compressed')
+    const rootNode=createHuffmanTree(freq)
 const codes=generateHuffmanCode(rootNode);
-const encodedString=encodeString(string, codes);
-console.log(encodedString)
+const encodedString=encodeString(reader.result, codes);
+    generateUrlEncodedString(encodedString);
+})
