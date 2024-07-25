@@ -3,9 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Huffman Coding for Image Files</title>
+    <title>File Compressor</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <input type="file" id="fileInput"/>
+    <div id="main-container">
+        <h1>File Compressor</h1> 
+        <div id="fileUpload-wrapper">
+            <input type="file" id="fileUpload">
+            <div id="uploadedFile">
+                <div><img src="image.png" alt="fileIcon" height="40"></div>
+                <div id="fileName-wrapper">
+                    <div id="fileName-percent">
+                        <p id="fileName">File Name</p>
+                        <p id="percent">50%</p>
+                    </div>
+                    <progress value='0' max="100"></progress>
+                </div>
+            </div>
+            <div id="btns">
+                <button id="uploadBtn">Upload</button>
+                <button id="compressBtn">Compress</button>
+            </div>
+        </div>                                  
+    </div>
+   <script src="script.js"></script>
 </body>
 </html>
