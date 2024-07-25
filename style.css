@@ -18,7 +18,7 @@ body{
     display: none;
 }
 #main-container{
-    height: 65vh;
+    height: auto;
     max-height: 300px;
     width: 500px;
     background-color: white;
@@ -59,7 +59,7 @@ progress{
     gap: 20px;
     flex-wrap: wrap;
     justify-content: center;
-    margin: 50px 0;
+    margin: 50px 0 20px 0;
 }
 #uploadBtn, #compressBtn{
     padding: 8px 17px;
