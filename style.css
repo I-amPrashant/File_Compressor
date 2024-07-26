@@ -61,7 +61,7 @@ progress{
     justify-content: center;
     margin: 50px 0 20px 0;
 }
-#uploadBtn, #compressBtn{
+#uploadBtn, #compressBtn, #decompressBtn{
     padding: 8px 17px;
     border-radius: 5px;
     font-size: 18px;
