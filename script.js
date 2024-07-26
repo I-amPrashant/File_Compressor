@@ -8,10 +8,10 @@ const fileIcon = document.getElementById('fileIcon');
   let freq={};
 uploadedFile.style.display ='none';
 let uploadSizeValid=true;
-uploadBtn.addEventListener('click', () => {
+uploadBtn.addEventListener('click', () =>{
     fileUpload.click();
 })
-fileUpload.addEventListener('change', () => {
+fileUpload.addEventListener('change', () =>{
     uploadedFile.style.display ='none';
     uploadSizeValid=true;
     uploadedFile.lastElementChild.id==='fileName-wrapper'?null:uploadedFile.lastElementChild.remove();
@@ -147,18 +147,23 @@ function generateHuffmanCode(root){
     return codes;
 }
 
-
 //encode the string using the huffman codes
 function encodeString(string, codes){
     return string.split('').map(char=>codes[char] || '').join('');
 }
-  
 
-function generateUrlEncodedString(encodedString){
+function generateUrlEncodedString(encodedString, rootNode) {
        // Convert binary string to Uint8Array
-    const byteArray = new Uint8Array(Math.ceil(encodedString.length / 8));
-    for (let i = 0; i < encodedString.length; i++) {
-        if (encodedString[i] === '1') {
+       const metaData={
+        fileName:fileUpload.files[0].name,
+       }
+       const newRootNode={...rootNode, ...metaData};
+       const actualString=encodedString + JSON.stringify(newRootNode);
+    //    const tree=actualString.slice(actualString.indexOf('{'))
+    //    console.log(JSON.parse(tree));
+    const byteArray = new Uint8Array(Math.ceil(actualString.length / 8));
+    for (let i = 0; i < actualString.length; i++) {
+        if (actualString[i] === '1') {
             byteArray[Math.floor(i / 8)] |= (1 << (7 - (i % 8)));
         }
     }
@@ -172,14 +177,13 @@ function generateUrlEncodedString(encodedString){
     <img src="download.png" alt="download" height="25">
     `
     a.href=url;
-    a.download='encoded.pb';
+    a.download=`${fileUpload.files[0].name}`;
     uploadedFile.appendChild(a);
 }
 
 document.getElementById('compressBtn').addEventListener('click', ()=>{
-    console.log('compressed')
     const rootNode=createHuffmanTree(freq)
 const codes=generateHuffmanCode(rootNode);
 const encodedString=encodeString(reader.result, codes);
-    generateUrlEncodedString(encodedString);
+    generateUrlEncodedString(encodedString, rootNode);
 })
