@@ -3,20 +3,22 @@ const uploadBtn = document.getElementById("uploadBtn");
 const fileName = document.getElementById("fileName");
 const uploadedFile = document.getElementById("uploadedFile");
 const fileIcon = document.getElementById("fileIcon");
+const errorDisplay= document.getElementById("errorDisplay");
 
 const reader = new FileReader();
 uploadedFile.style.display = "none";
-let uploadSizeValid = true, fileString='', btnPress = false;
+let uploadSizeValid = true, fileString='', compressBtnPress = false, decompressBtnPress = false;
 
 uploadBtn.addEventListener("click", () => {
   fileUpload.click();
 });
 fileUpload.addEventListener("change", () => {
   uploadedFile.style.display = "none";
-  uploadSizeValid = true, btnPress = false;
+  uploadSizeValid = true, compressBtnPress = false, decompressBtnPress = false;
   uploadedFile.lastElementChild.id === "fileName-wrapper"
     ? null
     : uploadedFile.lastElementChild.remove();
+    errorDisplay.style.display = 'none';
   const file = fileUpload.files[0];
   file.name.length > 30
     ? (fileName.textContent = `${file.name.slice(0, 25)}...`)
@@ -32,9 +34,10 @@ fileUpload.addEventListener("change", () => {
     fileIcon.src = "document.png";
   }
   //file size check
-  if (file.size > 7 * 1024 * 1024) {
+  if (file.size > 4 * 1024 * 1024) {
     uploadSizeValid = false;
-    alert("File size is too large. Please upload a file less than 7MB");
+    errorDisplay.style.display = "block";
+    errorDisplay.innerHTML = "File size too large. Please upload a file less than 4MB";
   }
   reader.onload = () => {
     uploadSizeValid
@@ -52,6 +55,10 @@ reader.addEventListener("progress", (e) => {
     document.getElementsByTagName("progress")[0].value = percent;
     document.getElementById("percent").textContent = `${Math.round(percent)}%`;
   }
+});
+reader.addEventListener("error", () => {
+    errorDisplay.innerHTML = "Something went wrong. Please try again.";
+  errorDisplay.style.display = "block";
 });
 
 //implementing huffman coding algorithm
@@ -147,7 +154,7 @@ function createHuffmanTree(freq) {
 }
 
 //generate huffman codes using the root node returned from the huffman tree.
-function generateHuffmanCode(root) {
+function generateHuffmanCode(root){
   const codes = {};
 
   function traverse(node, code) {
@@ -165,7 +172,7 @@ function generateHuffmanCode(root) {
 }
 
 //encode the string using the huffman codes
-function encodeString(string, codes) {
+function encodeString(string, codes){
   return string
     .split("")
     .map((char) => codes[char] || "")
@@ -195,7 +202,8 @@ function generateUrlEncodedString(encodedString, rootNode) {
     a.download = `${fileUpload.files[0].name}`;
     uploadedFile.appendChild(a);
   }else{
-    alert("File is already compressed");
+    errorDisplay.style.display = "block";
+    errorDisplay.innerHTML = "File already compressed";
   }
  
 }
@@ -250,15 +258,21 @@ function generateUrlEncodedString(encodedString, rootNode) {
 // }
 
 document.getElementById("compressBtn").addEventListener("click", () => {
-    if(!btnPress){
-        btnPress = true;
+    if(!fileUpload.files[0]){
+        errorDisplay.style.display='block'
+        errorDisplay.innerHTML = "Please select a file...";
+        return;
+    }
+    if(!compressBtnPress){
+        compressBtnPress = true;
       const freq = frequencyCount(fileString);
       const rootNode = createHuffmanTree(freq);
       const codes = generateHuffmanCode(rootNode);
       const encodedString = encodeString(fileString, codes);
       generateUrlEncodedString(encodedString, rootNode);
     }
-});
+})
+
 
 // document.getElementById("decompressBtn").addEventListener("click", () => {
 //   decodeString(reader.result);
