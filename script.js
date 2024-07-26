@@ -3,32 +3,46 @@ const uploadBtn = document.getElementById("uploadBtn");
 const fileName = document.getElementById("fileName");
 const uploadedFile = document.getElementById("uploadedFile");
 const fileIcon = document.getElementById("fileIcon");
-const errorDisplay= document.getElementById("errorDisplay");
+const errorDisplay = document.getElementById("errorDisplay");
 
 const reader = new FileReader();
 uploadedFile.style.display = "none";
-let uploadSizeValid = true, fileString='', compressBtnPress = false, decompressBtnPress = false;
+let uploadSizeValid = true,
+  fileString = "",
+  compressBtnPress = false,
+  decompressBtnPress = false;
+let decodedFileString = "";
 
 uploadBtn.addEventListener("click", () => {
   fileUpload.click();
-});
-fileUpload.addEventListener("change", () => {
   uploadedFile.style.display = "none";
-  uploadSizeValid = true, compressBtnPress = false, decompressBtnPress = false;
+  (uploadSizeValid = true),
+    (compressBtnPress = false),
+    (decompressBtnPress = false);
   uploadedFile.lastElementChild.id === "fileName-wrapper"
     ? null
     : uploadedFile.lastElementChild.remove();
-    errorDisplay.style.display = 'none';
+  errorDisplay.style.display = "none";
+});
+fileUpload.addEventListener("change", () => {
+  uploadedFile.style.display = "none";
+  (uploadSizeValid = true),
+    (compressBtnPress = false),
+    (decompressBtnPress = false);
+  uploadedFile.lastElementChild.id === "fileName-wrapper"
+    ? null
+    : uploadedFile.lastElementChild.remove();
+  errorDisplay.style.display = "none";
   const file = fileUpload.files[0];
   file.name.length > 30
     ? (fileName.textContent = `${file.name.slice(0, 25)}...`)
     : (fileName.textContent = file.name);
   //file type check
-  if (file.type.includes("image")){
+  if (file.type.includes("image")) {
     fileIcon.src = "image.png";
-  } else if (file.type.includes("text")){
+  } else if (file.type.includes("text")) {
     fileIcon.src = "text.png";
-  } else if (file.type.includes("audio")){
+  } else if (file.type.includes("audio")) {
     fileIcon.src = "mp3.png";
   } else {
     fileIcon.src = "document.png";
@@ -37,15 +51,17 @@ fileUpload.addEventListener("change", () => {
   if (file.size > 4 * 1024 * 1024) {
     uploadSizeValid = false;
     errorDisplay.style.display = "block";
-    errorDisplay.innerHTML = "File size too large. Please upload a file less than 4MB";
+    errorDisplay.innerHTML =
+      "File size too large. Please upload a file less than 4MB";
   }
   reader.onload = () => {
     uploadSizeValid
       ? (uploadedFile.style.display = "flex")
       : (uploadedFile.style.display = "none");
-      const textDecoder=new TextDecoder();
-      const text=textDecoder.decode(reader.result);
-      fileString=text;
+    decodedFileString = new Uint8Array(reader.result);
+    const textDecoder = new TextDecoder();
+    const text = textDecoder.decode(reader.result);
+    fileString = text;
   };
   reader.readAsArrayBuffer(file);
 });
@@ -57,7 +73,7 @@ reader.addEventListener("progress", (e) => {
   }
 });
 reader.addEventListener("error", () => {
-    errorDisplay.innerHTML = "Something went wrong. Please try again.";
+  errorDisplay.innerHTML = "Something went wrong. Please try again.";
   errorDisplay.style.display = "block";
 });
 
@@ -154,7 +170,7 @@ function createHuffmanTree(freq) {
 }
 
 //generate huffman codes using the root node returned from the huffman tree.
-function generateHuffmanCode(root){
+function generateHuffmanCode(root) {
   const codes = {};
 
   function traverse(node, code) {
@@ -172,7 +188,7 @@ function generateHuffmanCode(root){
 }
 
 //encode the string using the huffman codes
-function encodeString(string, codes){
+function encodeString(string, codes) {
   return string
     .split("")
     .map((char) => codes[char] || "")
@@ -181,18 +197,20 @@ function encodeString(string, codes){
 
 function generateUrlEncodedString(encodedString, rootNode) {
   // Convert binary string to Uint8Array
-  if(!localStorage.getItem(fileUpload.files[0].name)){
+  if (!localStorage.getItem(fileUpload.files[0].name)) {
+    errorDisplay.style.display = "none";
+
     localStorage.setItem(fileUpload.files[0].name, JSON.stringify(rootNode));
     const byteArray = new Uint8Array(Math.ceil(encodedString.length / 8));
-    for (let i = 0; i < encodedString.length; i++){
+    for (let i = 0; i < encodedString.length; i++) {
       if (encodedString[i] === "1") {
         byteArray[Math.floor(i / 8)] |= 1 << (7 - (i % 8));
       }
     }
-  
-    const blob = new Blob([byteArray], { type: "text/plain" });
+
+    const blob = new Blob([byteArray], { type: "application/octet-stream" });
     const url = URL.createObjectURL(blob);
-  
+
     //create download url
     const a = document.createElement("a");
     a.innerHTML = `
@@ -201,79 +219,87 @@ function generateUrlEncodedString(encodedString, rootNode) {
     a.href = url;
     a.download = `${fileUpload.files[0].name}`;
     uploadedFile.appendChild(a);
-  }else{
+  } else {
     errorDisplay.style.display = "block";
     errorDisplay.innerHTML = "File already compressed";
   }
- 
 }
 
 // Function to decode the encoded string using the Huffman Tree
-// function decodeString(encodedString) {
-//   const newEncodedString = new Uint8Array(encodedString);
+function decodeString(byteArray, huffTree) {
+  if (localStorage.getItem(fileUpload.files[0].name)) {
+    errorDisplay.style.display = "none";
 
-//   let binaryString = "";
+    let binaryString = "";
+    for (let i = 0; i < byteArray.length; i++) {
+      let byte = byteArray[i];
+      for (let j = 7; j >= 0; j--) {
+        binaryString += byte & (1 << j) ? "1" : "0";
+      }
+    }
 
-//   for (let byte of newEncodedString) {
-//     // Convert byte to a binary string and pad with leading zeros
-//     let bits = byte.toString(2).padStart(8, "0");
-//     binaryString += bits;
-//   }
+    let decodedString = "";
+    let currentNode = huffTree;
 
-//   // console.log(binaryString);
+    for (let bit of binaryString) {
+      if (bit === "0") {
+        currentNode = currentNode.left;
+      } else {
+        currentNode = currentNode.right;
+      }
 
-//   const seperator = "000000001000000100000";
-//   const treeData = binaryString.slice(
-//     binaryString.indexOf(seperator) + seperator.length
-//   );
+      // If we reach a leaf node
+      if (!currentNode.left && !currentNode.right) {
+        decodedString += currentNode.char;
+        currentNode = huffTree; // Go back to the root for the next character
+      }
+    }
 
-//   // Split the binary string into chunks of 8 bits
-//   let chunks = treeData.match(/.{1,8}/g);
-
-//   // Convert each chunk from binary to decimal (byte value)
-//   let byteArray = chunks.map((byte) => parseInt(byte, 2));
-
-//   // Convert byte array to a string using TextDecoder
-//   let text = new TextDecoder().decode(new Uint8Array(byteArray));
-//   console.log(text);
-
-//   // let decodedString = '';
-//   // let currentNode = root;
-
-//   // for (let bit of encodedString) {
-//   //     if (bit === '0') {
-//   //         currentNode = currentNode.left;
-//   //     } else {
-//   //         currentNode = currentNode.right;
-//   //     }
-
-//   //     // If we reach a leaf node
-//   //     if (currentNode.char !== null) {
-//   //         decodedString += currentNode.char;
-//   //         currentNode = root; // Go back to the root for the next character
-//   //     }
-//   // }
-
-//   // return decodedString;
-// }
+    const blob = new Blob([decodedString], {
+      type: "application/octet-stream",
+    });
+    const url = URL.createObjectURL(blob);
+    uploadedFile.lastElementChild.id === "fileName-wrapper"
+      ? null
+      : uploadedFile.lastElementChild.remove();
+    const a = document.createElement("a");
+    a.innerHTML = `
+      <img src="download.png" alt="download" height="25">
+      `;
+    a.download = `${fileUpload.files[0].name}`;
+    a.href = url;
+    uploadedFile.appendChild(a);
+  } else {
+    errorDisplay.style.display = "block";
+    errorDisplay.innerHTML = "Please compress the file first";
+  }
+}
 
 document.getElementById("compressBtn").addEventListener("click", () => {
-    if(!fileUpload.files[0]){
-        errorDisplay.style.display='block'
-        errorDisplay.innerHTML = "Please select a file...";
-        return;
-    }
-    if(!compressBtnPress){
-        compressBtnPress = true;
-      const freq = frequencyCount(fileString);
-      const rootNode = createHuffmanTree(freq);
-      const codes = generateHuffmanCode(rootNode);
-      const encodedString = encodeString(fileString, codes);
-      generateUrlEncodedString(encodedString, rootNode);
-    }
-})
+  if (!fileUpload.files[0]) {
+    errorDisplay.style.display = "block";
+    errorDisplay.innerHTML = "Please select a file...";
+    return;
+  }
+  if (!compressBtnPress) {
+    compressBtnPress = true;
+    const freq = frequencyCount(fileString);
+    const rootNode = createHuffmanTree(freq);
+    const codes = generateHuffmanCode(rootNode);
+    const encodedString = encodeString(fileString, codes);
+    generateUrlEncodedString(encodedString, rootNode);
+  }
+});
 
-
-// document.getElementById("decompressBtn").addEventListener("click", () => {
-//   decodeString(reader.result);
-// });
+document.getElementById("decompressBtn").addEventListener("click", () => {
+  if (!fileUpload.files[0]) {
+    errorDisplay.style.display = "block";
+    errorDisplay.innerHTML = "Please select a file...";
+    return;
+  }
+  if (!decompressBtnPress) {
+    decompressBtnPress = true;
+    const huffTree = JSON.parse(localStorage.getItem(fileUpload.files[0].name));
+    decodeString(decodedFileString, huffTree);
+  }
+});
