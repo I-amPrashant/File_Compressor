@@ -38,21 +38,15 @@ fileUpload.addEventListener("change", () => {
     ? (fileName.textContent = `${file.name.slice(0, 25)}...`)
     : (fileName.textContent = file.name);
   //file type check
-  if (file.type.includes("image")) {
-    fileIcon.src = "image.png";
-  } else if (file.type.includes("text")) {
+  if (file.type.includes("text")) {
     fileIcon.src = "text.png";
-  } else if (file.type.includes("audio")) {
-    fileIcon.src = "mp3.png";
-  } else {
-    fileIcon.src = "document.png";
   }
   //file size check
-  if (file.size > 4 * 1024 * 1024) {
+  if (file.size > 5 * 1024 * 1024) {
     uploadSizeValid = false;
     errorDisplay.style.display = "block";
     errorDisplay.innerHTML =
-      "File size too large. Please upload a file less than 4MB";
+      "File size too large. Please upload a file less than 5MB";
   }
   reader.onload = () => {
     uploadSizeValid
