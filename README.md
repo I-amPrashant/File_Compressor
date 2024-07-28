@@ -30,6 +30,7 @@ To run this project locally, follow these steps:
 - Click on the "Decompress" button to decompress the uploaded file.
 - The decompressed file will be downloaded as a .txt file.
 
+ NOTE:- Don't directly decompress the file currently uploaded, reupload the encoded file for decompression. This is only a demonstration of huffman algorithm so remember to clear you local Storage and make sure your have your original file in your device. 
 
 ## Features
 
@@ -38,7 +39,7 @@ To run this project locally, follow these steps:
 - Only text files are supported.
 - Compressed file is in URL encoded format.
 - Decompressed file is in plain text format.
-- Don't directly decompress the file currently uploaded, reupload the encoded file for decompression.
+
 
 
 ## How it works
